@@ -1,5 +1,5 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
-import { Subscription } from 'rxjs/Subscription';
+import { Component, OnInit } from '@angular/core';
+import { Observable } from 'rxjs';
 
 import { TutorialService } from '../../services/tutorial.service';
 
@@ -10,22 +10,14 @@ import { Tutorial } from '../../models/tutorial.model';
   templateUrl: './read.component.html',
   styleUrls: ['./read.component.css']
 })
-export class ReadComponent implements OnInit, OnDestroy {
+export class ReadComponent implements OnInit {
 
-  tutorialsSubscription: Subscription;
-  tutorials: Tutorial[];
+  tutorials$: Observable<Tutorial[]>;
 
   constructor(private tutorialService: TutorialService) {}
 
   ngOnInit() {
-    this.tutorials = this.tutorialService.getTutorials();
-    this.tutorialsSubscription = this.tutorialService.tutorialsModified.subscribe(
-      () => this.tutorials = this.tutorialService.getTutorials()
-    );
-  }
-
-  ngOnDestroy() {
-    this.tutorialsSubscription.unsubscribe();
+    this.tutorials$ = this.tutorialService.tutorialsModifiedAsync;
   }
 
   delTutorial(index: number) {

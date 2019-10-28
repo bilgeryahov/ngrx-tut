@@ -1,11 +1,12 @@
-import { Subject } from 'rxjs/Subject';
+import { BehaviorSubject } from 'rxjs/BehaviorSubject';
 
 import { Tutorial } from '../models/tutorial.model';
+import { Observable } from 'rxjs';
 
 export class TutorialService {
 
-    public tutorialsModified = new Subject<null>();
-
+    public tutorialsModifiedAsync: Observable<Tutorial[]>;
+    private tutorialsModified: BehaviorSubject<Tutorial[]>;
     private tutorials: Tutorial[] = [
         {
             name: 'Initial Tutorial',
@@ -13,21 +14,18 @@ export class TutorialService {
         }
     ];
 
-    public getTutorials(): Tutorial[] {
-        // slice() returns a new array, which can be edited, without modifying the original one.
-        return this.tutorials.slice();
+    constructor() {
+        this.tutorialsModified = new BehaviorSubject<Tutorial[]>(this.tutorials);
+        this.tutorialsModifiedAsync = this.tutorialsModified.asObservable();
     }
 
     public addTutorial(tutorial: Tutorial): void {
         this.tutorials.push(tutorial);
-        // Manually handle updates.
-        this.tutorialsModified.next();
+        this.tutorialsModified.next(this.tutorials);
     }
 
     public removeTutorial(index: number): void {
-        // Remove the element without mutating the array.
         this.tutorials = [...this.tutorials.slice(0, index), ...this.tutorials.slice(index + 1)];
-        // Manually handle updates.
-        this.tutorialsModified.next();
+        this.tutorialsModified.next(this.tutorials);
     }
 }
